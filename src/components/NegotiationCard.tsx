@@ -1,69 +1,69 @@
-import { Printer, MessageSquare, Target, User } from 'lucide-react';
-import type { LoanResult, BorrowerInput } from '@/types';
+import { Printer, MessageSquare, Target, User, Landmark } from 'lucide-react';
+import type { LoanResult } from '@/types';
 import { formatINR } from '@/domain/loanEngine';
 
 interface NegotiationCardProps {
   result: LoanResult;
-  input: BorrowerInput;
 }
 
-export function NegotiationCard({ result, input }: NegotiationCardProps) {
+export function NegotiationCard({ result }: NegotiationCardProps) {
   const card = result.negotiationCard;
-
-  const handlePrint = () => {
-    window.print();
-  };
+  const handlePrint = () => window.print();
 
   return (
     <div className="card p-6 sm:p-8" id="negotiation-card">
       <div className="flex items-start justify-between mb-6 no-print">
         <div className="flex items-center gap-2">
           <MessageSquare className="w-5 h-5 text-plum-500" />
-          <h3 className="text-lg font-serif font-semibold text-plum-700">Negotiation Card</h3>
+          <h3 className="text-lg font-serif font-semibold text-plum-700">Your Negotiation Card</h3>
         </div>
         <button onClick={handlePrint} className="btn-secondary flex items-center gap-2 text-sm py-2 px-4">
           <Printer className="w-4 h-4" />
-          Print
+          Print / Save
         </button>
       </div>
 
       {/* Print-only header */}
       <div className="hidden print:block mb-6">
-        <h1 className="text-2xl font-serif font-bold text-plum-700">Borrower Copilot — Negotiation Card</h1>
-        <p className="text-sm text-plum-400">Know Before You Owe</p>
+        <h1 className="text-2xl font-serif font-bold text-plum-700">Negotiation Card</h1>
+        <p className="text-sm text-plum-400">Borrower Copilot · take this to the branch</p>
       </div>
 
-      {/* Profile summary */}
-      <div className="flex items-start gap-3 mb-6 p-4 bg-plum-50/50 rounded-xl">
+      {/* Profile */}
+      <div className="flex items-start gap-3 mb-5 p-4 bg-plum-50/50 rounded-xl">
         <User className="w-5 h-5 text-plum-400 mt-0.5 shrink-0" />
         <div>
-          <p className="text-xs font-medium text-plum-400 uppercase tracking-wider mb-1">Borrower Profile</p>
+          <p className="text-xs font-medium text-plum-400 uppercase tracking-wider mb-1">Who I am</p>
           <p className="text-sm text-plum-700 leading-relaxed">{card.profileSummary}</p>
         </div>
       </div>
 
-      {/* Target numbers grid */}
+      {/* Product ask */}
+      <div className="flex items-center gap-2 mb-5 p-3 rounded-xl border border-plum-100 bg-white">
+        <Landmark className="w-4 h-4 text-plum-500 shrink-0" />
+        <p className="text-sm text-plum-600">
+          Ask for a <span className="font-semibold text-plum-700">{card.productLabel}</span>
+        </p>
+      </div>
+
+      {/* Target numbers */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="p-4 rounded-xl border border-plum-100 bg-white">
-          <p className="text-xs text-plum-400 mb-1">Target Rate</p>
+          <p className="text-xs text-plum-400 mb-1">Fair rate</p>
           <p className="text-xl font-mono font-bold text-plum-700">
-            {(card.targetRate * 100).toFixed(2)}%
+            {(card.targetRateLow * 100).toFixed(2)}–{(card.targetRateHigh * 100).toFixed(2)}%
           </p>
-          <p className="text-[10px] text-plum-300 mt-0.5">Walk in asking for this</p>
+          <p className="text-[10px] text-plum-300 mt-0.5">Walk away above {(card.walkAwayRate * 100).toFixed(2)}%</p>
         </div>
         <div className="p-4 rounded-xl border border-plum-100 bg-white">
-          <p className="text-xs text-plum-400 mb-1">Target EMI</p>
-          <p className="text-xl font-mono font-bold text-plum-700">
-            {formatINR(card.targetEMI)}
-          </p>
-          <p className="text-[10px] text-plum-300 mt-0.5">Per month ceiling</p>
+          <p className="text-xs text-plum-400 mb-1">EMI I'll agree to</p>
+          <p className="text-xl font-mono font-bold text-plum-700">{formatINR(card.targetEMI)}</p>
+          <p className="text-[10px] text-plum-300 mt-0.5">Per month, at the low rate</p>
         </div>
         <div className="p-4 rounded-xl border border-plum-100 bg-white">
-          <p className="text-xs text-plum-400 mb-1">Target Loan Amount</p>
-          <p className="text-xl font-mono font-bold text-plum-700">
-            {formatINR(card.targetLoanAmount)}
-          </p>
-          <p className="text-[10px] text-plum-300 mt-0.5">Safe carry limit</p>
+          <p className="text-xs text-plum-400 mb-1">Amount I'll take</p>
+          <p className="text-xl font-mono font-bold text-plum-700">{formatINR(card.targetLoanAmount)}</p>
+          <p className="text-[10px] text-plum-300 mt-0.5">Not the full sanction</p>
         </div>
       </div>
 
@@ -71,7 +71,7 @@ export function NegotiationCard({ result, input }: NegotiationCardProps) {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Target className="w-4 h-4 text-plum-500" />
-          <p className="text-xs font-medium text-plum-400 uppercase tracking-wider">Talking Points for the Branch</p>
+          <p className="text-xs font-medium text-plum-400 uppercase tracking-wider">What I'll say at the counter</p>
         </div>
         <ol className="space-y-3">
           {card.talkingPoints.map((point, i) => (
@@ -85,11 +85,8 @@ export function NegotiationCard({ result, input }: NegotiationCardProps) {
         </ol>
       </div>
 
-      {/* Print footer */}
       <div className="hidden print:block mt-8 pt-4 border-t border-plum-100">
-        <p className="text-xs text-plum-400">
-          Generated by Borrower Copilot · {new Date().toLocaleDateString('en-IN')}
-        </p>
+        <p className="text-xs text-plum-400">Generated by Borrower Copilot · {new Date().toLocaleDateString('en-IN')} · a self-assessment, not a sanction guarantee.</p>
       </div>
     </div>
   );

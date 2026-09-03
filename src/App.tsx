@@ -16,6 +16,7 @@ function App() {
     reset,
     compute,
     confidence,
+    setShowResults,
   } = useBorrowerState();
 
   const [rulesOpen, setRulesOpen] = useState(false);
@@ -41,8 +42,8 @@ function App() {
                 Know Before You Owe
               </h2>
               <p className="text-base text-plum-500 leading-relaxed">
-                Assess your loan eligibility, discover fair interest rates, and walk into the bank
-                with a negotiation card — all before speaking to a lender.
+                Answer a few questions and find out whether you should borrow, how much you can safely
+                carry, a fair interest rate, and the EMI to agree to — then take a one-page card to the branch.
               </p>
             </div>
 
@@ -54,7 +55,7 @@ function App() {
             />
           </div>
         ) : (
-          <ResultsDashboard result={result} input={input} onBack={() => {}} />
+          <ResultsDashboard result={result} input={input} onBack={() => setShowResults(false)} />
         )}
       </main>
 

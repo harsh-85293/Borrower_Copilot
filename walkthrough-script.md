@@ -1,93 +1,103 @@
-# Borrower Copilot — 5-Minute Walkthrough Script
+# Five-minute walkthrough
 
-**Speaker:** Information Science engineering student with MERN stack background
-**Audience:** Course evaluator / peers
-**Duration:** ~5 minutes
-
----
-
-## [0:00–0:30] Introduction
-
-"Hey everyone, I'm an Information Science engineering student, and for this project I built **Borrower Copilot** — a financial self-assessment tool that helps Indian borrowers figure out their loan eligibility and fair terms *before* they walk into a bank.
-
-The problem is simple: most borrowers in India — especially in the informal sector — have no idea what a fair interest rate looks like, how much they can safely borrow, or what their EMI ceiling should be. They walk into a branch, the lender quotes a number, and they accept it because they have no benchmark. Borrower Copilot gives them that benchmark."
+A written walkthrough of Borrower Copilot: the decisions behind it, one borrower
+end to end, and what I would build next versus cut. Reads in about five minutes;
+works as a script for a screen recording.
 
 ---
 
-## [0:30–1:15] Architecture & State Management
+## The problem, in one line
 
-"Now, coming from a MERN stack background, my instinct was to reach for Redux or a state management library. But for this app, I deliberately chose **pure React state management using a custom hook** — specifically, a `useBorrowerState` hook that wraps `useState` and `useMemo`.
+Every lender has a model that decides what a borrower gets. The borrower walks in
+with nothing, takes the first sanction letter, and finds out years later they paid
+four points over fair and stretched to 65% of income. This app is the borrower's
+model — a self-assessment that makes them the best-informed person in the room.
 
-Here's why: the app's state is self-contained. There's one form, one set of inputs, one result. There's no global state shared across dozens of components. Redux would be overkill — it would add bundle size, boilerplate, and complexity for no benefit. Instead, the hook centralizes all state logic in one place: the borrower input, the computed result, the current wizard step, and the confidence score. The hook returns these as simple values and callbacks, and any component that needs them gets them via props.
+## What it produces
 
-If this app grows — say we add user accounts and saved assessments — that's when I'd consider a context provider or a lightweight store like Zustand. But right now, a custom hook is the cleanest, most readable choice."
+Four answers and a card:
 
----
+1. **Should I borrow?** A verdict — and "Don't borrow yet" is reachable and fires
+   for Anita.
+2. **How much?** Two numbers, always separated: what a lender will *sanction*, and
+   what the borrower can *safely carry*. We tell them to use the smaller one.
+3. **What rate is fair?** A band (not a point) plus the all-in APR with fees, so a
+   lender's quote can be compared honestly.
+4. **What EMI?** A monthly ceiling, the tenure trade-off, and a 20%-income-drop
+   stress case.
 
-## [1:15–2:15] Domain Logic Decoupling
+Then a one-page **Negotiation Card** they can print and hold up at the counter.
 
-"The most important architectural decision I made was **strictly separating domain logic from the UI**. All the financial calculations live in a single file called `loanEngine.ts`. This file contains pure functions — they take a `BorrowerInput` object and return a `LoanResult` object. No React, no DOM, no side effects.
+## The one decision that carries the app: rules separated from UI
 
-Why does this matter? Three reasons:
+Every lending rule lives in `src/domain/loanEngine.ts` as pure functions —
+`BorrowerInput` in, `LoanResult` out, no React, no DOM. The components only render.
+Three reasons this matters here:
 
-First, **testability**. I can write unit tests against `loanEngine.ts` without rendering a single React component. I can verify that a salaried borrower with income ₹85,000 and CIBIL 780 gets exactly the right EMI ceiling — pure input, pure output.
+- **You can read the whole product's judgement in one file.** FOIR ceilings,
+  product routing, the rate build-up, the stress test — all in one place, which is
+  also what `RULES.md` documents row for row.
+- **Changing a rule is a one-line change.** The follow-up interview says you'll
+  ask me to change a rule live. Because the engine is isolated, moving the informal
+  FOIR ceiling from 35% to 30%, or the no-CIBIL premium from 2.5% to 2%, is a single
+  constant edit that re-flows every output.
+- **It's testable and portable.** I sanity-checked all three personas by importing
+  the engine directly, no UI needed. The same file could sit behind an API later
+  without touching the calculation.
 
-Second, **portability**. When I build the Node.js backend — which I'll talk about in a minute — I can import this exact same `loanEngine.ts` file into a server route. The calculation logic doesn't change whether it runs in the browser or on the server. That's the payoff of decoupling.
+## Four ideas I want a reviewer to notice
 
-Third, **readability**. A new developer looking at the codebase can understand the business rules by reading `loanEngine.ts` — the FOIR limits, the credit score bands, the stress test — without having to parse through JSX and CSS classes. The UI components just call `calculateLoan(input)` and render the result."
+**The lender number and the borrower number are deliberately different.** Priya's
+bank will sanction ₹17.8L. She wants ₹8L. The app shows both and says: borrow ₹8L.
+The gap *is* the product.
 
----
+**Unknown is never zero.** Ravi and Anita have no CIBIL. That's not a 300 — it's a
++2.5% thin-file premium, clearly labelled as negotiable with income proof, and it
+lowers their confidence score (which widens their rate band) rather than tanking
+their verdict.
 
-## [2:15–3:00] The Unknown Credit Score Edge Case
+**Secured routing.** Ravi owns a ₹45L shop, so the engine routes his business ask
+to a Loan Against Property at 10.5% instead of an unsecured business loan at 14.5%.
+The single most valuable thing the app tells him.
 
-"One of the trickiest edge cases I had to handle is the **unknown credit score** scenario. In India, a huge segment of borrowers — especially in the informal sector — have never had a credit card or formal loan. They don't have a CIBIL score. Traditional tools would either block them or ask them to guess.
+**Confidence is honest.** The fewer questions answered, the wider the band and the
+more we shave the safe-carry number — and a banner says exactly that. We never
+narrow a range we have no basis to narrow.
 
-Here's how I handle it smoothly: in the wizard, when the user reaches the credit step, they see two options — 'I know my CIBIL score' and 'I don't have a CIBIL score.' If they select unknown, the score input field disappears entirely — no confusing empty field staring at them. Instead, they see a friendly message explaining that a +2.5% risk premium will be applied to their base rate, and that this premium is negotiable.
+## One borrower, end to end: Anita
 
-In the domain engine, the `getCreditAdjustment` function checks the credit status. If it's 'unknown', it returns a flat +2.5% premium. If it's 'known', it looks up the score in a band table — 800+ gets −0.5%, 750–799 is neutral, down to 300–599 at +3.5%.
+Anita rides for a delivery platform and tailors at home, ₹28,000/mo, two kids,
+husband out of work eight months. Three app loans at 30%+, ₹35,000 outstanding,
+and she bounced an EMI last month. She wants ₹1.5L for an electric scooter.
 
-And critically, the **Negotiation Card** generates a specific talking point for unknown-credit borrowers: it tells them to bring income proof to the branch and negotiate the risk premium down. So the edge case isn't just handled mathematically — it's turned into actionable advice."
+Walking her through: informal income, no CIBIL (no penalty, just a premium), and
+on the "sharpen" step she flags zero savings, unstable income, ₹35,000 of
+high-cost debt, and the recent bounce.
 
----
+The engine routes the scooter to a two-wheeler loan (cheaper than app loans), and
+the affordability math alone would sanction ~₹1.5L. But the verdict logic sees a
+bounce plus two more danger signals and returns **Don't Borrow Yet** — clear the
+30% app loans and stabilise first. Her card tells her to come back in three months
+with a clean record. The scooter would raise her income, so it's "not now", not
+"never". That's the judgement the whole challenge is testing: turning lending
+sense into a rule a borrower can see and a machine can run.
 
-## [3:00–4:00] The Four Outputs & Negotiation Card
+## What I'd build next
 
-"The app produces four outputs, each addressing a different question a borrower should ask before signing:
+- **Live rate anchors.** Base rates are point-in-time market figures today. I'd
+  fetch repo/MCLR-linked bands so they stay current instead of drifting.
+- **Multi-lender comparison.** Take offers the borrower has already received and
+  score each against the fair band and all-in APR right on the card.
+- **Debt-consolidation path.** For Anita's case, model the actual saving from
+  refinancing 30% app loans into one cheaper loan, with a payoff timeline.
+- **Localisation.** The copy should speak Kannada/Hindi for the borrowers who need
+  this most; the number logic is already language-agnostic.
 
-**O1 — Verdict:** Should I borrow at all? The engine checks if existing EMIs already exceed 40% of income (Consolidate First), if income can't support any new EMI (Don't Borrow), if borrowing at max capacity pushes FOIR above 45% (Borrow Less), or if everything looks healthy (Borrow). Each verdict comes with a one-sentence rationale.
+## What I'd cut
 
-**O2 — Max Amount:** This is where I separate 'what the bank will give you' from 'what you should actually take.' The Lender Sanction Limit is the mathematical maximum. The Safe Carry Limit is 70% of that — because borrowing at your absolute ceiling leaves no room for emergencies.
-
-**O3 — Fair Rate:** A rate band, not a single number — because negotiation happens in ranges. Plus the all-in APR including processing fees and GST, which is the true cost of borrowing.
-
-**O4 — EMI Ceiling:** The maximum monthly outflow, paired with a stress test that simulates a 20% income drop. For Priya and Ravi, the stress test shows 'Dangerous' — their EMI burden exceeds 50% of reduced income. For Anita, it's 'Manageable' — her conservative FOIR limit of 35% actually protects her.
-
-The **Negotiation Card** ties it all together — profile summary, target numbers, and 3–5 specific talking points. It has a print button that uses CSS `@media print` to isolate just the card for a clean single-page printout. The borrower walks into the branch with this card."
-
----
-
-## [4:00–4:45] Design & UX Decisions
-
-"On the design side, I went for an editorial fintech aesthetic — light cream backgrounds, deep plum accents, serif headings, and monospace fonts for all currency figures. The monospace font for money is a deliberate choice: it aligns numbers visually and signals precision.
-
-The wizard is adaptive — if you select 'Self-Employed,' additional fields for ITR and collateral slide in. If you select 'Salaried,' those fields don't exist. The Confidence Meter gamifies data collection: as you answer more optional questions, the meter fills from red to green, encouraging users to provide more data for a better assessment."
-
----
-
-## [4:45–5:00] Future Plans — Node.js Backend
-
-"Right now, this is a pure frontend app — all calculations run in the browser, no server. That's intentional for a self-assessment tool: your financial data never leaves your device.
-
-But the next step is a **Node.js backend with Express**. The plan is:
-- An API endpoint that accepts borrower inputs and returns the same `LoanResult` — reusing `loanEngine.ts` on the server.
-- A MongoDB database to save assessments against user accounts, so borrowers can track how their eligibility changes over time.
-- Integration with live MCLR rates from RBI APIs, so base rates auto-update instead of being hardcoded.
-- A lender comparison layer that pulls real offers from partner banks and compares them against our fair rate band.
-
-The architecture I chose — pure domain functions, custom hooks, no heavy state library — makes this transition straightforward. The domain engine is server-ready today. I just need to wrap it in an Express route and add a database. That's the MERN stack coming full circle."
-
----
-
-## Closing
-
-"Borrower Copilot turns an opaque, intimidating process — walking into a bank and accepting whatever terms are quoted — into an informed, data-driven decision. Three personas, from a salaried tech worker in Bengaluru to an informal tailor in Hubballi, can all use the same tool and walk away knowing exactly what they should borrow, at what rate, and what to say when the lender pushes back. Thank you."
+- I already cut a "number of dependents" question while building this — it never
+  moved an output on its own, and the brief is explicit that a question that doesn't
+  change a number should go. If I brought it back it would have to feed a real
+  expense estimate, not just sit there.
+- I'd resist adding more loan products than the three borrowers need. Breadth of
+  products isn't what makes this useful; the reasoning is.

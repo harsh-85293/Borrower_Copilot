@@ -1,206 +1,118 @@
-# Borrower Copilot — Run-Throughs for Test Personas
+# Run-throughs — Priya, Ravi, Anita
 
-This document traces the exact question flow, the four computed outputs (O1–O4), and the Negotiation Card details for each of the three test personas.
+The three borrowers from the brief, run through the app. For each: the questions
+asked, the four outputs (O1–O4), and the Negotiation Card. Numbers below are the
+engine's actual output (`src/domain/loanEngine.ts`), not hand-estimates.
+
+Where the brief gives a range (Ravi's ₹40k–80k cash, Anita's ₹26k–30k), the app
+uses the midpoint and says so. Load any of them from the **Quick Load** menu.
 
 ---
 
-## Persona 1: Priya (29, Salaried, Bengaluru)
+## Priya — 29, salaried, Bengaluru
 
-### Question Flow
+Software engineer, 5 years at an MNC. Net ₹1,10,000/mo. Car loan EMI ₹14,000
+(2 years left). CIBIL 780. Rent ₹28,000. Wants **₹8,00,000 for a wedding**.
 
-| Step | Question | Priya's Answer |
-|---|---|---|
-| 1 — Profile | Full Name | Priya Sharma |
-| 1 — Profile | Age | 29 |
-| 1 — Profile | City | Bengaluru |
-| 2 — Employment | Employment Type | Salaried |
-| 2 — Employment | Net Monthly Income | ₹85,000 |
-| 2 — Employment | Existing Monthly EMIs | ₹12,000 |
-| 2 — Employment | Monthly Expenses | ₹35,000 |
-| 3 — Credit | Credit Status | Known |
-| 3 — Credit | CIBIL Score | 780 |
-| 4 — Loan | Purpose | Home renovation |
-| 4 — Loan | Tenure | 60 months |
-| 5 — Optional | Dependents | 0 |
-| 5 — Optional | Has Insurance | Yes |
-| 5 — Optional | Job Tenure | 36 months |
-| 5 — Optional | Other Income | ₹0 |
-
-**Confidence Meter: 100%** (all optional fields answered + credit score known)
-
-### Calculations
-
-- **FOIR Limit:** 50% (salaried) → ₹85,000 × 0.50 = ₹42,500
-- **EMI Ceiling:** ₹42,500 − ₹12,000 (existing EMIs) = **₹30,500/month**
-- **Base Rate:** 9.5% (salaried)
-- **Credit Adjustment:** 0% (score 780 falls in 750–799 band)
-- **Final Rate:** 9.5% + 0% = **9.5%**
-- **Lender Sanction Limit:** MaxLoanFromEMI(₹30,500, 9.5%, 60mo) ≈ **₹14,42,000**
-- **Safe Carry Limit:** ₹14,42,000 × 0.70 ≈ **₹10,09,000**
-- **Processing Fee:** ₹14,42,000 × 1.2% × 1.18 ≈ ₹20,400
-- **APR:** ~10.2% (rate + amortized fee)
-- **Stress Test:** Income drops to ₹68,000 → New FOIR = (₹30,500 + ₹12,000) / ₹68,000 = 62.5% → **Dangerous**
-- **Verdict:** Existing EMIs = ₹12,000 / ₹85,000 = 14.1% (< 40%, no consolidate). EMI ceiling > 0. Total FOIR at max = (₹30,500 + ₹12,000) / ₹85,000 = 50% (at FOIR limit, not > 45% above). → **Borrow** (at safe carry limit)
-
-### Four Outputs
+**Questions asked:** name/age/city → employment (salaried) + income + existing
+EMIs + expenses → CIBIL known (780) → purpose (wedding) + amount (₹8L) + tenure
+(60mo) → sharper: 4 months savings, income steady, no high-cost debt, no bounce,
+no co-applicant. The self-employed ITR/collateral block is **not shown** — she's
+salaried. **Confidence: 100%.**
 
 | Output | Result |
 |---|---|
-| **O1 — Verdict** | **Borrow** — Your income comfortably supports the safe carry limit of ₹10,09,000 within a 50% FOIR ceiling. |
-| **O2 — Max Amount** | Lender Sanction Limit: **₹14,42,000** · Safe Carry Limit: **₹10,09,000** |
-| **O3 — Fair Rate** | Rate Band: **9.50%–10.50%** · All-in APR: **~10.2%** |
-| **O4 — EMI Ceiling** | Max EMI: **₹30,500/mo** · Stress Test: Income drops to ₹68,000 → FOIR hits 62.5% → **Dangerous — EMI burden exceeds 50% of reduced income** |
+| **Product** | Personal Loan (no collateral offered) |
+| **O1 — Verdict** | **Borrow.** Her ₹1,10,000 income comfortably carries ₹8,00,000 within a 50% ceiling and survives a 20% income shock. |
+| **O2 — How much** | Lender may sanction **₹17,81,846**; safe to carry **₹14,25,477**. She only wants ₹8L, so **borrow ₹8,00,000** — well within safe. |
+| **O3 — Fair rate** | Band **13.00%–14.00%**, all-in APR **14.14%**. |
+| **O4 — EMI** | Ceiling **₹41,000/mo**. Stress test: income drops to ₹88,000, debt-to-income **36.8% → passes**. |
 
-### Negotiation Card
+**Negotiation Card:** Personal Loan · rate 13.00–14.00%, walk away above 14.00% ·
+borrow ₹8,00,000 not the full sanction · "My CIBIL is 780, put me in your best
+tier" · "Quote the all-in APR, my benchmark is 14.14%".
 
-- **Profile:** Priya Sharma, 29 — salaried in Bengaluru. Income: ₹85,000/mo. CIBIL: 780.
-- **Target Rate:** 9.50%
-- **Target EMI:** ₹21,350/mo (70% of ceiling)
-- **Target Loan Amount:** ₹10,09,000
-- **Talking Points:**
-  1. My fair rate band is 9.50%–10.50% — I won't accept above 10.50%.
-  2. My safe EMI ceiling is ₹30,500/month — I cannot commit beyond this.
-  3. My CIBIL score is 780 — I qualify for your best rate tier, not the standard quote.
+Priya is the clean "yes". The point the card makes for her: the bank will happily
+offer her ₹17L — she should take less than half that.
 
 ---
 
-## Persona 2: Ravi (42, Self-Employed, Mysuru)
+## Ravi — 42, self-employed, Mysuru
 
-### Question Flow
+Kirana store, 14 years. Cash ₹40k–80k/mo (midpoint **₹60,000** used); ITR shows
+**₹4,20,000/year**. Owns shop premises ~**₹45,00,000**, unencumbered. No CIBIL.
+Wife earns ₹18,000 teaching. Wants **₹15,00,000** for a second stock line and a
+delivery vehicle, over 84 months.
 
-| Step | Question | Ravi's Answer |
-|---|---|---|
-| 1 — Profile | Full Name | Ravi Kumar |
-| 1 — Profile | Age | 42 |
-| 1 — Profile | City | Mysuru |
-| 2 — Employment | Employment Type | Self-Employed |
-| 2 — Employment | Net Monthly Income | ₹1,20,000 |
-| 2 — Employment | Existing Monthly EMIs | ₹25,000 |
-| 2 — Employment | Monthly Expenses | ₹45,000 |
-| 2 — Employment (Adaptive) | Annual ITR Amount | ₹15,00,000 |
-| 2 — Employment (Adaptive) | Has Collateral | Yes |
-| 2 — Employment (Adaptive) | Collateral Value | ₹20,00,000 |
-| 3 — Credit | Credit Status | Known |
-| 3 — Credit | CIBIL Score | 710 |
-| 4 — Loan | Purpose | Business expansion |
-| 4 — Loan | Tenure | 84 months |
-| 5 — Optional | Dependents | 3 |
-| 5 — Optional | Has Insurance | Yes |
-| 5 — Optional | Job Tenure | 120 months |
-| 5 — Optional | Other Income | ₹15,000 |
-
-**Confidence Meter: 100%** (all optional fields + credit known)
-
-### Calculations
-
-- **FOIR Limit:** 45% (self-employed) → ₹1,20,000 × 0.45 = ₹54,000
-- **EMI Ceiling:** ₹54,000 − ₹25,000 = **₹29,000/month**
-- **Base Rate:** 10.5% (self-employed)
-- **Credit Adjustment:** +0.5% (score 710 falls in 700–749 band)
-- **Final Rate:** 10.5% + 0.5% = **11.0%**
-- **EMI-based sanction:** MaxLoanFromEMI(₹29,000, 11%, 84mo) ≈ ₹13,70,000
-- **ITR-based sanction:** ITR income = ₹15,00,000/12 = ₹1,25,000/mo → FOIR cap = ₹56,250 − ₹25,000 = ₹31,250 → MaxLoanFromEMI(₹31,250, 11%, 84mo) ≈ ₹14,76,000
-- **Collateral-based:** ₹20,00,000 × 70% = **₹14,00,000**
-- **Lender Sanction Limit:** max(₹13,70,000, ₹14,76,000, ₹14,00,000) ≈ **₹14,76,000**
-- **Safe Carry Limit:** ₹14,76,000 × 0.70 ≈ **₹10,33,000**
-- **Processing Fee:** ₹14,76,000 × 1.2% × 1.18 ≈ ₹20,900
-- **APR:** ~11.8%
-- **Stress Test:** Income drops to ₹96,000 → New FOIR = (₹29,000 + ₹25,000) / ₹96,000 = 56.2% → **Dangerous**
-- **Verdict:** Existing EMIs = ₹25,000 / ₹1,20,000 = 20.8% (< 40%). EMI ceiling > 0. Total FOIR at max = (₹29,000 + ₹25,000) / ₹1,20,000 = 45% (at limit). → **Borrow** (at safe carry limit)
-
-### Four Outputs
+**Questions asked:** the salaried path **plus** the adaptive self-employed block
+(ITR ₹4.2L, collateral ₹45L) and the co-applicant question (wife, ₹18,000). No
+CIBIL, so the score field is replaced by the no-score explanation.
+**Confidence: 75%** (no credit history is the missing 25).
 
 | Output | Result |
 |---|---|
-| **O1 — Verdict** | **Borrow** — Your income comfortably supports the safe carry limit of ₹10,33,000 within a 45% FOIR ceiling. |
-| **O2 — Max Amount** | Lender Sanction Limit: **₹14,76,000** · Safe Carry Limit: **₹10,33,000** |
-| **O3 — Fair Rate** | Rate Band: **11.00%–12.00%** · All-in APR: **~11.8%** |
-| **O4 — EMI Ceiling** | Max EMI: **₹29,000/mo** · Stress Test: Income drops to ₹96,000 → FOIR hits 56.2% → **Dangerous — EMI burden exceeds 50% of reduced income** |
+| **Product** | **Loan Against Property (LAP)** — routed to secured because he owns unencumbered property, cutting the rate vs an unsecured business loan. |
+| **O1 — Verdict** | **Borrow Less.** Even at ₹15,00,000, a 20% income dip pushes EMIs past half his income. Borrow less or stretch the tenure. |
+| **O2 — How much** | Lender may sanction **₹27,00,000** (60% of the ₹45L property); safe to carry **₹20,58,750**. He wants ₹15L, so **borrow ₹15,00,000** — but see the stress note. |
+| **O3 — Fair rate** | Band **12.50%–14.50%** (wide, because no CIBIL widens it), all-in APR **13.98%**. |
+| **O4 — EMI** | Ceiling **₹23,850/mo**. Stress test at ₹15L over 84mo: debt-to-income **65.3% → fails**, which is why the verdict is Borrow Less. |
 
-### Negotiation Card
+**Why the conservative call:** the engine lends against min(cash ₹60k, ITR ₹35k) +
+wife ₹18k = ₹53k assessable, not the full ₹60–80k cash. That's deliberate for a
+self-assessment tool (see RULES.md) and it's what produces the useful "borrow
+less or lengthen tenure" nudge instead of rubber-stamping ₹15L.
 
-- **Profile:** Ravi Kumar, 42 — self employed in Mysuru. Income: ₹1,20,000/mo. CIBIL: 710.
-- **Target Rate:** 11.00%
-- **Target EMI:** ₹20,300/mo (70% of ceiling)
-- **Target Loan Amount:** ₹10,33,000
-- **Talking Points:**
-  1. My fair rate band is 11.00%–12.00% — I won't accept above 12.00%.
-  2. My safe EMI ceiling is ₹29,000/month — I cannot commit beyond this.
-  3. My CIBIL score is 710 — I qualify for your best rate tier, not the standard quote.
-  4. I have ITR showing ₹15.00 L annual income — treat me as a documented borrower, not informal.
-  5. I'm offering collateral worth ₹20.00 L — this should reduce my rate, not just increase my loan size.
+**Negotiation Card:** LAP · rate 12.50–14.50% · "Route me to a LAP, not an
+unsecured business loan — I own the shop outright" · "I'm pledging ₹45.00L of
+property, that should cut my rate, not just raise my limit" · "No CIBIL, but ITR
+and 14 years of trading back me — the 2.5% no-score premium is negotiable".
+
+Ravi is the case the brief flags by name: correctly routed to a secured product,
+and the borrower's safe number is honestly below what the bank would sanction.
 
 ---
 
-## Persona 3: Anita (35, Informal, Hubballi)
+## Anita — 35, informal, Hubballi
 
-### Question Flow
+Delivery rider plus home tailoring, ₹26k–30k/mo (midpoint **₹28,000**). Two
+children, husband unemployed 8 months. Three app loans, **₹35,000** outstanding
+at 30%+, servicing ~₹4,500/mo, **one EMI bounced last month**. Wants **₹1,50,000**
+for an electric scooter to double her delivery runs.
 
-| Step | Question | Anita's Answer |
-|---|---|---|
-| 1 — Profile | Full Name | Anita Devi |
-| 1 — Profile | Age | 35 |
-| 1 — Profile | City | Hubballi |
-| 2 — Employment | Employment Type | Informal |
-| 2 — Employment | Net Monthly Income | ₹28,000 |
-| 2 — Employment | Existing Monthly EMIs | ₹3,000 |
-| 2 — Employment | Monthly Expenses | ₹18,000 |
-| 3 — Credit | Credit Status | Unknown (no CIBIL score) |
-| 4 — Loan | Purpose | Working capital for tailoring shop |
-| 4 — Loan | Tenure | 36 months |
-| 5 — Optional | Dependents | 2 |
-| 5 — Optional | Has Insurance | No |
-| 5 — Optional | Job Tenure | 48 months |
-| 5 — Optional | Other Income | ₹0 |
-
-**Confidence Meter: 60%** (3 of 5 confidence fields answered — credit unknown, no insurance, no other income)
-
-### Calculations
-
-- **FOIR Limit:** 35% (informal) → ₹28,000 × 0.35 = ₹9,800
-- **EMI Ceiling:** ₹9,800 − ₹3,000 = **₹6,800/month**
-- **Base Rate:** 14% (informal)
-- **Credit Adjustment:** +2.5% (unknown credit — risk premium applied)
-- **Final Rate:** 14% + 2.5% = **16.5%**
-- **Lender Sanction Limit:** MaxLoanFromEMI(₹6,800, 16.5%, 36mo) ≈ **₹1,96,000**
-- **Safe Carry Limit:** ₹1,96,000 × 0.70 ≈ **₹1,37,000**
-- **Processing Fee:** ₹1,96,000 × 1.2% × 1.18 ≈ ₹2,775
-- **APR:** ~17.8%
-- **Stress Test:** Income drops to ₹22,400 → New FOIR = (₹6,800 + ₹3,000) / ₹22,400 = 43.7% → **Manageable** (under 50%)
-- **Verdict:** Existing EMIs = ₹3,000 / ₹28,000 = 10.7% (< 40%). EMI ceiling > 0. Total FOIR at max = (₹6,800 + ₹3,000) / ₹28,000 = 35% (at FOIR limit, not > 45%). → **Borrow** (at safe carry limit)
-
-### Four Outputs
+**Questions asked:** informal employment + income + existing EMIs + expenses →
+no CIBIL → purpose (electric scooter) + ₹1.5L + 36mo → sharper: 0 months savings,
+income not steady, high-cost debt ₹35,000, **bounce = yes**, no co-applicant
+(husband unemployed). **Confidence: 65%.**
 
 | Output | Result |
 |---|---|
-| **O1 — Verdict** | **Borrow** — Your income comfortably supports the safe carry limit of ₹1,37,000 within a 35% FOIR ceiling. |
-| **O2 — Max Amount** | Lender Sanction Limit: **₹1,96,000** · Safe Carry Limit: **₹1,37,000** |
-| **O3 — Fair Rate** | Rate Band: **16.50%–17.50%** · All-in APR: **~17.8%** |
-| **O4 — EMI Ceiling** | Max EMI: **₹6,800/mo** · Stress Test: Income drops to ₹22,400 → FOIR = 43.7% → **Manageable under stress** |
+| **Product** | Two-Wheeler Loan (the scooter is its own collateral — cheaper than an app loan). |
+| **O1 — Verdict** | **Don't Borrow Yet.** A recent missed payment plus existing pressure means new EMI debt would likely push her into a trap. Stabilise cash flow and clear the high-cost app loans first. |
+| **O2 — How much** | Lender might sanction **₹1,50,752**; safe to carry **₹97,612**. But the verdict overrides this — the honest answer is *not now*. |
+| **O3 — Fair rate** | Band **14.80%–17.20%**, all-in APR **17.02%** — still far below the 30%+ she pays on app loans. |
+| **O4 — EMI** | Ceiling **₹5,300/mo**. On ₹1.5L the stress test technically passes (35.4%), but the bounce + high-cost-debt danger signals fire the "Don't Borrow Yet" verdict first. |
 
-### Negotiation Card
+**Negotiation Card:** Two-Wheeler Loan · "I'll revisit in 3 months with a clean
+repayment record rather than borrow under pressure now" · "No CIBIL, but ₹28,000/mo
+income backs a small secured loan" · and the standing advice to refinance the
+30%+ app loans first.
 
-- **Profile:** Anita Devi, 35 — informal in Hubballi. Income: ₹28,000/mo. No CIBIL score.
-- **Target Rate:** 16.50%
-- **Target EMI:** ₹4,760/mo (70% of ceiling)
-- **Target Loan Amount:** ₹1,37,000
-- **Talking Points:**
-  1. My fair rate band is 16.50%–17.50% — I won't accept above 17.50%.
-  2. My safe EMI ceiling is ₹6,800/month — I cannot commit beyond this.
-  3. I don't have a CIBIL score yet, but my income of ₹28,000/mo supports this loan — the +2.5% risk premium is negotiable.
+Anita is the reachable **"Don't"** the brief insists on. The tool doesn't just
+crunch affordability — it recognises that borrowing more on top of a fresh bounce
+and 30% app loans is how the debt trap closes, and it says so. The scooter would
+raise her income, so the advice is "clear the trap, then come back", not "never".
 
 ---
 
-## Comparison Summary
+## Side by side
 
-| Metric | Priya | Ravi | Anita |
+| | Priya | Ravi | Anita |
 |---|---|---|---|
-| Employment | Salaried | Self-Employed | Informal |
-| Income | ₹85,000/mo | ₹1,20,000/mo | ₹28,000/mo |
-| FOIR Limit | 50% | 45% | 35% |
-| Credit Status | Known (780) | Known (710) | Unknown |
-| Final Rate | 9.50% | 11.00% | 16.50% |
-| Sanction Limit | ₹14,42,000 | ₹14,76,000 | ₹1,96,000 |
-| Safe Carry | ₹10,09,000 | ₹10,33,000 | ₹1,37,000 |
-| Stress Verdict | Dangerous | Dangerous | Manageable |
-| Confidence | 100% | 100% | 60% |
+| Employment | Salaried | Self-employed | Informal |
+| Assessable income | ₹1,10,000 | ₹53,000 (min of cash/ITR + wife) | ₹28,000 |
+| Credit | 780 | None | None |
+| Product routed | Personal | **LAP (secured)** | Two-wheeler |
+| Verdict | Borrow | Borrow Less | **Don't Borrow Yet** |
+| Fair rate | 13.00–14.00% | 12.50–14.50% | 14.80–17.20% |
+| Borrow this | ₹8,00,000 | ≤ safe, stretch tenure | ₹0 for now |
+| Confidence | 100% | 75% | 65% |
