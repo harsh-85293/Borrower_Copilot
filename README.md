@@ -1,6 +1,7 @@
 # Borrower Copilot
 
-**Live demo:** https://harsh-85293.github.io/Borrower_Copilot/
+**Live demo:** https://borrower-copilot-iota.vercel.app
+(mirror: https://harsh-85293.github.io/Borrower_Copilot/)
 
 A financial self-assessment tool that helps an Indian borrower answer four questions
 *before* they walk into a bank:
