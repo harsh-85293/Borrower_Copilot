@@ -171,10 +171,10 @@ function ProfileStep({ input, onUpdate }: StepProps) {
       </Field>
       <div className="grid grid-cols-2 gap-4">
         <Field label="Age">
-          <input type="number" value={input.age || ''} onChange={(e) => onUpdate('age', Number(e.target.value))} placeholder="29" className="input-field" />
+          <input type="number" value={input.age || ''} onChange={(e) => onUpdate('age', Number(e.target.value))} placeholder="e.g. 30" className="input-field" />
         </Field>
         <Field label="City">
-          <input type="text" value={input.city} onChange={(e) => onUpdate('city', e.target.value)} placeholder="Bengaluru" className="input-field" />
+          <input type="text" value={input.city} onChange={(e) => onUpdate('city', e.target.value)} placeholder="e.g. Bengaluru" className="input-field" />
         </Field>
       </div>
     </div>
@@ -208,14 +208,14 @@ function IncomeStep({ input, onUpdate }: StepProps) {
         ))}
       </div>
       <Field label="Net monthly income (₹)" hint={input.employmentType === 'self-employed' ? 'Your take-home cash. We corroborate this against ITR below.' : undefined}>
-        <input type="number" value={input.netMonthlyIncome || ''} onChange={(e) => onUpdate('netMonthlyIncome', Number(e.target.value))} placeholder="110000" className="input-field font-mono" />
+        <input type="number" value={input.netMonthlyIncome || ''} onChange={(e) => onUpdate('netMonthlyIncome', Number(e.target.value))} placeholder="e.g. 50,000" className="input-field font-mono" />
       </Field>
       <div className="grid grid-cols-2 gap-4">
         <Field label="Existing monthly EMIs (₹)" hint="Loans you already service">
-          <input type="number" value={input.existingEMIs || ''} onChange={(e) => onUpdate('existingEMIs', Number(e.target.value))} placeholder="14000" className="input-field font-mono" />
+          <input type="number" value={input.existingEMIs || ''} onChange={(e) => onUpdate('existingEMIs', Number(e.target.value))} placeholder="e.g. 8,000" className="input-field font-mono" />
         </Field>
         <Field label="Monthly living expenses (₹)">
-          <input type="number" value={input.monthlyExpenses || ''} onChange={(e) => onUpdate('monthlyExpenses', Number(e.target.value))} placeholder="28000" className="input-field font-mono" />
+          <input type="number" value={input.monthlyExpenses || ''} onChange={(e) => onUpdate('monthlyExpenses', Number(e.target.value))} placeholder="e.g. 20,000" className="input-field font-mono" />
         </Field>
       </div>
 
@@ -224,12 +224,12 @@ function IncomeStep({ input, onUpdate }: StepProps) {
         <div className="space-y-4 p-4 bg-plum-50/50 rounded-xl border border-plum-100 animate-[fadeIn_0.3s_ease]">
           <p className="text-xs font-medium text-plum-500 uppercase tracking-wide">Self-employed — documentation</p>
           <Field label="Annual income shown on ITR (₹)" hint="Documented income lets a lender treat you as prime, not informal.">
-            <input type="number" value={input.itrAmount || ''} onChange={(e) => onUpdate('itrAmount', Number(e.target.value))} placeholder="420000" className="input-field font-mono" />
+            <input type="number" value={input.itrAmount || ''} onChange={(e) => onUpdate('itrAmount', Number(e.target.value))} placeholder="e.g. 4,20,000" className="input-field font-mono" />
           </Field>
           <Toggle label="I own unencumbered property or gold I could pledge" value={input.hasCollateral} onChange={(v) => onUpdate('hasCollateral', v)} />
           {input.hasCollateral && (
             <Field label="Value of that collateral (₹)" hint="Routes you to a cheaper secured loan.">
-              <input type="number" value={input.collateralValue || ''} onChange={(e) => onUpdate('collateralValue', Number(e.target.value))} placeholder="4500000" className="input-field font-mono" />
+              <input type="number" value={input.collateralValue || ''} onChange={(e) => onUpdate('collateralValue', Number(e.target.value))} placeholder="e.g. 45,00,000" className="input-field font-mono" />
             </Field>
           )}
         </div>
@@ -265,7 +265,7 @@ function CreditStep({ input, onUpdate }: StepProps) {
       </div>
       {input.creditStatus === 'known' && (
         <Field label="CIBIL score (300–900)">
-          <input type="number" min={300} max={900} value={input.creditScore || ''} onChange={(e) => onUpdate('creditScore', Number(e.target.value))} placeholder="780" className="input-field font-mono" />
+          <input type="number" min={300} max={900} value={input.creditScore || ''} onChange={(e) => onUpdate('creditScore', Number(e.target.value))} placeholder="e.g. 750" className="input-field font-mono" />
         </Field>
       )}
       {input.creditStatus === 'unknown' && (
@@ -290,7 +290,7 @@ function LoanStep({ input, onUpdate }: StepProps) {
         <input type="text" value={input.loanPurpose} onChange={(e) => onUpdate('loanPurpose', e.target.value)} placeholder="Electric scooter for deliveries" className="input-field" />
       </Field>
       <Field label="How much do you want (₹)?">
-        <input type="number" value={input.loanAmountWanted || ''} onChange={(e) => onUpdate('loanAmountWanted', Number(e.target.value))} placeholder="150000" className="input-field font-mono" />
+        <input type="number" value={input.loanAmountWanted || ''} onChange={(e) => onUpdate('loanAmountWanted', Number(e.target.value))} placeholder="e.g. 5,00,000" className="input-field font-mono" />
       </Field>
       <Field label="Preferred tenure">
         <div className="flex items-center gap-3">
@@ -362,7 +362,7 @@ function SharperStep({ input, onUpdate }: StepProps) {
       />
       {input.hasCoApplicant && (
         <Field label="Co-applicant net monthly income (₹)" hint="Added to your assessable income, lifting eligibility.">
-          <input type="number" value={input.coApplicantIncome || ''} onChange={(e) => onUpdate('coApplicantIncome', Number(e.target.value))} placeholder="18000" className="input-field font-mono" />
+          <input type="number" value={input.coApplicantIncome || ''} onChange={(e) => onUpdate('coApplicantIncome', Number(e.target.value))} placeholder="e.g. 15,000" className="input-field font-mono" />
         </Field>
       )}
 
